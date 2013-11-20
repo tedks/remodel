@@ -7,3 +7,8 @@
 *.cmx
 *.cmxs
 *.cmxa
+src/remodel_lex.ml
+src/remodel_parse.ml
+src/remodel_parse.mli
+src/remodel_parse.output
+src/remodel
