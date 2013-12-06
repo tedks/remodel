@@ -20,9 +20,9 @@ prog:
 | production NEWLINE prog { $1 :: $3 }
 
 production:
-| DEFAULT RULEDIR filelist { Default($3) }
-| filelist RULEDIR filelist { Bare_target($1, $3) }
-| filelist RULEDIR filelist RULESEP COMMAND
+| DEFAULT RULEDIR STRING { Default($3) }
+| STRING RULEDIR filelist { Bare_target($1, $3) }
+| STRING RULEDIR filelist RULESEP COMMAND
     { Command_target($1, $3, $5) }
 
 filelist:
