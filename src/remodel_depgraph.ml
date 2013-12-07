@@ -17,8 +17,10 @@ let string_of_item (i:item) =
 type depgraph =
 | Leaf of string 			(* filename *)
 | Node of string * string option * depgraph list
+| Empty
 
-let rec string_of_depgraph g = match g with 
+let rec string_of_depgraph g = match g with
+  | Empty -> "<Empty>"
   | Leaf fn -> P.sprintf "<File %s>" fn
   | Node (t, sc, deps) -> 
     let deps = String.concat ";" (L.map string_of_depgraph deps) in
@@ -50,3 +52,21 @@ let make_graph (prods:Remodel_ast.production list) =
       Node (t, i.command, L.map (build_depgraph g) i.deps)
   in build_depgraph graph !default
 
+let rec postorder f i dg = match dg with
+  | Empty | Leaf _ -> f dg
+  | Node (t, c, ds) -> L.iter (postorder f i) ds; f dg
+   
+
+let rec filter f dg = match dg with
+  | Empty -> Empty
+  | Leaf _ -> if f dg then dg else Empty
+  | Node (t, c, dps) ->
+    let filtered_dps = L.fold_left (fun acc n -> match n with
+      | Empty -> acc
+      | Node _ -> 
+	let filtered_node = (filter f n) in begin match filtered_node with
+	  | Node _ -> filtered_node::acc
+	  | Empty -> acc end
+      | Leaf _ -> if f n then n::acc else acc) [] dps in
+    if L.length filtered_dps == 0 then Empty
+    else Node (t, c, filtered_dps)
