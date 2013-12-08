@@ -79,12 +79,18 @@ let rec filter f dg = match dg with
     let filtered_dps = L.fold_left (fun acc n -> match n with
       | Empty -> acc
       | Node _ -> 
-	let filtered_node = (filter f n) in begin match filtered_node with
+	let filtered_node = (filter f n) 
+	in begin match filtered_node with
 	  (* code smell! *)
 	  | Leaf _ -> failwith "Filter should never return a Leaf given a Node"
 	  | Node _ -> filtered_node::acc
-	  | Empty -> acc end
-      | Leaf _ -> if f n then n::acc else acc) [] dps in
-    if L.length filtered_dps == 0 then Empty
+	  | Empty -> acc 
+	end
+      | Leaf _ -> if f n then n::acc else acc) [] dps 
+    in
+    let include_node = f dg in 
+    if (not include_node) && L.length filtered_dps == 0 then Empty
+    (* if we have to include the node, or if any of our dependencies
+       have to be included, include the node. *)
     else Node (t, c, filtered_dps)
 
