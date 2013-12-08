@@ -28,17 +28,15 @@ let remodel_build dg =
 	| _ -> failwith (P.sprintf "Error building %s via %s" t c) end
     | None -> ()) dg
     
-let _ = 
-  let prog = Remodel_parse.prog Remodel_lex.file (Lexing.from_channel stdin) in 
-  List.iter (fun prod -> 
+let _ =
+  let prog = Remodel_parse.prog Remodel_lex.file (Lexing.from_channel stdin) in
+  List.iter (fun prod ->
     print_endline (Remodel_ast.string_of_production prod)) prog;
   C.init ();
-  let dg = D.make_graph prog in 
+  let dg = D.make_graph prog in
   print_endline @@ D.string_of_depgraph dg;
   let dg' = remodel_filter dg in
   print_endline "Filtered: "; print_endline @@ D.string_of_depgraph dg';
   remodel_build dg'
-  
-;;
 
   

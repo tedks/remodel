@@ -52,10 +52,25 @@ let make_graph (prods:Remodel_ast.production list) =
       Node (t, i.command, L.map (build_depgraph g) i.deps)
   in build_depgraph graph !default
 
-let rec postorder f i dg = match dg with
+type traversal_setting = Preorder | Postorder
+
+let rec fold (ts : traversal_setting) (f : 'a -> depgraph -> 'a) 
+    (i : 'a) (dg : depgraph) : 'a =
+  match dg with
+  | Empty -> f i Empty
+  | Leaf _ -> f i dg
+  | Node (_,_,dps) ->
+    let eval_node i = f i dg in
+    let eval_childs i = L.fold_left (fun acc n -> fold ts f acc n) i dps in
+    match ts with
+    | Preorder -> 
+      eval_childs (eval_node i)
+    | Postorder -> 
+      eval_node (eval_childs i)
+
+let rec postorder f dg = match dg with
   | Empty | Leaf _ -> f dg
-  | Node (t, c, ds) -> L.iter (postorder f i) ds; f dg
-   
+  | Node (t, c, ds) -> L.iter (postorder f) ds; f dg
 
 let rec filter f dg = match dg with
   | Empty -> Empty
@@ -65,8 +80,11 @@ let rec filter f dg = match dg with
       | Empty -> acc
       | Node _ -> 
 	let filtered_node = (filter f n) in begin match filtered_node with
+	  (* code smell! *)
+	  | Leaf _ -> failwith "Filter should never return a Leaf given a Node"
 	  | Node _ -> filtered_node::acc
 	  | Empty -> acc end
       | Leaf _ -> if f n then n::acc else acc) [] dps in
     if L.length filtered_dps == 0 then Empty
     else Node (t, c, filtered_dps)
+
