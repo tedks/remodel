@@ -54,23 +54,37 @@ let make_graph (prods:Remodel_ast.production list) =
 
 type traversal_setting = Preorder | Postorder
 
-let rec fold (ts : traversal_setting) (f : 'a -> depgraph -> 'a) 
+let foldi (ts : traversal_setting) (f : 'a -> int -> depgraph -> 'a) 
     (i : 'a) (dg : depgraph) : 'a =
-  match dg with
-  | Empty -> f i Empty
-  | Leaf _ -> f i dg
-  | Node (_,_,dps) ->
-    let eval_node i = f i dg in
-    let eval_childs i = L.fold_left (fun acc n -> fold ts f acc n) i dps in
-    match ts with
-    | Preorder -> 
-      eval_childs (eval_node i)
-    | Postorder -> 
-      eval_node (eval_childs i)
+  let rec foldi_impl (l : int) (i : 'a) (dg : depgraph) : 'a = match dg with
+    | Empty -> f i l Empty
+    | Leaf _ -> f i l dg
+    | Node (_,_,dps) ->
+      let eval_node i = f i l dg in
+      let eval_childs i = 
+	L.fold_left (fun acc n -> foldi_impl (l+1) acc n) i dps in
+      match ts with
+      | Preorder -> 
+	eval_childs (eval_node i)
+      | Postorder -> 
+	eval_node (eval_childs i)
+  in foldi_impl 0 i dg
 
-let rec postorder f dg = match dg with
-  | Empty | Leaf _ -> f dg
-  | Node (t, c, ds) -> L.iter (postorder f) ds; f dg
+let fold (ts : traversal_setting) (f : 'a -> depgraph -> 'a )
+    (i : 'a) (dg : depgraph) = 
+  foldi ts (fun acc i n -> f acc n) i dg
+
+let rec foldi_preorder  f i g = foldi Preorder f i g
+let rec foldi_postorder f i g = foldi Postorder f i g
+let rec fold_preorder  f i g = fold Preorder f i g
+let rec fold_postorder f i g = fold Postorder f i g
+
+
+let rec iter_postorder (f : depgraph -> unit) (dg : depgraph) : unit = 
+  fold_postorder (fun acc n -> f n) () dg
+let rec iter_preorder (f : depgraph -> unit) (dg : depgraph) : unit = 
+  fold_preorder (fun acc n -> f n) () dg
+let iter = iter_preorder
 
 let rec filter f dg = match dg with
   | Empty -> Empty
