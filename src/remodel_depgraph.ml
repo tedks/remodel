@@ -27,7 +27,7 @@ let rec string_of_depgraph g = match g with
     P.sprintf "<Node target=%s command=%s deps=[%s]>"
       t (match sc with Some c -> c | None -> "<no command>") deps
 
-let make_graph (prods:Remodel_ast.production list) = 
+let make_graph (entry : string option) (prods:Remodel_ast.production list) = 
   let default = ref "" in 
   let add_item g (i:item) = 
     if H.mem g i.target 
@@ -50,7 +50,7 @@ let make_graph (prods:Remodel_ast.production list) =
       let i = H.find g t in
       assert (i.target = t);
       Node (t, i.command, L.map (build_depgraph g) i.deps)
-  in build_depgraph graph !default
+  in build_depgraph graph (match entry with None -> !default | Some e -> e)
 
 type traversal_setting = Preorder | Postorder
 
