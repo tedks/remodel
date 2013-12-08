@@ -17,10 +17,10 @@ let init () =
     else ()
 
 let stale path = 
-  let cache_ch = open_in @@ cache_path path in 
   try 
+    let cache_ch = open_in @@ cache_path path in 
     let r = Digest.file path <> Digest.input cache_ch in 
-    close_in cache_ch; 
+    close_in cache_ch;
     r
   (* if we can't open a cache file, or can't open the actual file, we're
      stale *)
