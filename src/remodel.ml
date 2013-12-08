@@ -11,7 +11,7 @@ let (@@) fn x = fn x
 let remodel_filter dg =
   D.filter (fun n -> match n with
   | D.Empty -> false
-  | D.Node _ -> failwith "Shouldn't filter over nodes?"
+  | D.Node (t,_,_) -> C.stale t
   | D.Leaf s -> C.stale s) dg
 
 let remodel_build dg = 
