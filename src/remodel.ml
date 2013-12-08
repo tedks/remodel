@@ -41,7 +41,8 @@ let remodel_build dg =
   in 
   let cmdmap = 
     L.fold_left (fun cmap (l, c) ->
-      let level = max_int - l in 
+      let level = max_int - l in 	(* iter counts up, so we flip
+					   the levels *)
       let upd = if IM.mem level cmap 
 	then c::IM.find level cmap else [c] in
       IM.add level upd cmap) IM.empty commands in 
@@ -50,7 +51,7 @@ let remodel_build dg =
       let check_build res acc = 
 	match acc with Failure -> acc | Success -> res in 
       let result = 			(* parallelism goes here *)
-	Par.parmapfold ~ncores:16 remodel_exec_command (Par.L cl)
+	Par.parmapfold remodel_exec_command (Par.L cl)
 	  check_build Success check_build in 
       match result with 
       | Success -> ()
@@ -66,6 +67,7 @@ let parse_to_depgraph entry inf =
 
 let run () = 
   C.init ();
+  Par.set_default_ncores (2 * (Par.get_default_ncores ()));
   let entry_point = ref None in 
   let infile = ref None in 
   let debug = ref false in 
