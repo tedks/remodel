@@ -18,13 +18,19 @@ let init () =
 
 let stale path = 
   let cache_ch = open_in @@ cache_path path in 
-  let r = Digest.file path <> Digest.input cache_ch in 
-  close_in cache_ch; 
-  r
+  try 
+    let r = Digest.file path <> Digest.input cache_ch in 
+    close_in cache_ch; 
+    r
+  (* if we can't open a cache file, or can't open the actual file, we're
+     stale *)
+  with Sys_error _ -> true 		
 
 let cache path = 
-  let ch = open_out @@ cache_path path in 
-  Digest.output ch (Digest.file path);
-  close_out ch
+  try
+    let ch = open_out @@ cache_path path in 
+    Digest.output ch (Digest.file path);
+    close_out ch
+  with Sys_error _ -> failwith (P.sprintf "Couldn't cache path %s" path)
     
   
