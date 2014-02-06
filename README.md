@@ -7,6 +7,7 @@ Remodel uses an MD5 hash of files and dependencies to enforce ordering between d
 
 Remodel currently doesn't use work-stealing, so each level of the dependency graph will build as fast as the slowest node on that level.
 
+
 Building Remodel
 ----------------
 
