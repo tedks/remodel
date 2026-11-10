@@ -21,4 +21,17 @@ After installing parmap, simply run `make` in the top-level directory:
 
 This will leave a `remodel` binary under remodel/src/.
 
+## Bazel OCaml graph tracer
+
+The Bazel target `//test:depgraph_test` compiles `src/remodel_ast.ml` and
+`src/remodel_depgraph.ml` as separate modules, then runs assertions over graph
+construction and traversal. It is a bounded toolchain tracer; the complete
+Remodel executable also needs the lexer, parser, cache, and Parmap package.
+
+The Bazel module pins OCaml 5.5.2 source by SHA-256 and uses BCR-pinned GCC and
+configure/make rules to build a compiler. This configuration currently targets
+Linux x86-64. The compiler action and remote portability must be verified
+before treating this graph as an accepted onboarding target. The existing
+`make -C src` entry point remains available.
+
 

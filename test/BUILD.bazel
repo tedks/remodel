@@ -1,0 +1,7 @@
+load("//bazel:ocaml_rules.bzl", "ocaml_test")
+
+ocaml_test(
+    name = "depgraph_test",
+    src = "depgraph_test.ml",
+    deps = ["//src:remodel_depgraph"],
+)

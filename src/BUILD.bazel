@@ -1,0 +1,19 @@
+load("//bazel:ocaml_rules.bzl", "ocaml_library")
+
+package(default_visibility = ["//visibility:private"])
+
+ocaml_library(
+    name = "remodel_ast",
+    src = "remodel_ast.ml",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+ocaml_library(
+    name = "remodel_depgraph",
+    src = "remodel_depgraph.ml",
+    visibility = ["//test:__pkg__"],
+    deps = [":remodel_ast"],
+)
